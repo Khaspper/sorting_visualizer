@@ -91,6 +91,8 @@ export default class SortingVisualizer extends React.Component {
         }
     
         for (let i = 0; i < temp.length; i++) {
+            // Kept saying Line 94:13:  Do not mutate state directly. Use setState()
+            // But can't figure out how to make merge sort work without this code
             this.state.array[startIndex + i] = temp[i];
             this.setState({ array: this.state.array });
     
@@ -103,10 +105,47 @@ export default class SortingVisualizer extends React.Component {
         this.setState({ highlights: [] }); // Clear highlights
     }
 
+    async quickSort(startIndex = 0, endIndex = this.state.array.length - 1) {
+        let length = this.state.array.length;
+        if (startIndex < endIndex) {
+            const pivotIndex = await this.partition(startIndex, endIndex);
+            await this.quickSort(startIndex, pivotIndex - 1);
+            await this.quickSort(pivotIndex + 1, endIndex);
+        }
+        if (startIndex === 0 && endIndex === this.state.array.length - 1) {
+            this.setState({ sorted: Array.from({ length: length }, (_, index) => index), highlights: [] });
+        }
+    }
+    
+    async partition(startIndex, endIndex) {
+        const array = this.state.array.slice();
+        const pivot = array[endIndex];
+        let pivotIndex = startIndex;
+    
+        for (let i = startIndex; i < endIndex; i++) {
+            this.setState({ highlights: [i, endIndex] }); // Highlighting current index and pivot
+            await new Promise(resolve => setTimeout(resolve, .01));
+    
+            if (array[i] < pivot) {
+                // swap elements array[i] and array[pivotIndex]
+                [array[i], array[pivotIndex]] = [array[pivotIndex], array[i]];
+                this.setState({ array: array, highlights: [i, pivotIndex] });
+                await new Promise(resolve => setTimeout(resolve, 50));
+                pivotIndex++;
+            }
+        }
+        // swap elements array[pivotIndex] and array[endIndex]
+        [array[pivotIndex], array[endIndex]] = [array[endIndex], array[pivotIndex]];
+        this.setState({ array: array, highlights: [pivotIndex] });
+        await new Promise(resolve => setTimeout(resolve, .01));
+    
+        return pivotIndex;
+    }
+
     testSortingAlgorithms() {
         for (let i = 0; i < 1; i++) {
             const array = [];
-            for (let j = 0; i < randomIntFromInterval(1, 1000); i++) {
+            for (let j = 0; j < randomIntFromInterval(1, 1000); j++) {
                 array.push(randomIntFromInterval(-1000, 1000));
             }
             const javaScriptedArray = array.slice().sort((a, b) => a - b);
@@ -123,15 +162,19 @@ export default class SortingVisualizer extends React.Component {
                 <div className='nav-bar'>
                     <button onClick={() => this.resetArray()}>Generate New Array</button>
                     <button onClick={() => this.mergeSort()}>Merge Sort</button>
+                    <button onClick={() => this.quickSort()}>Quick Sort</button>
                     <button onClick={() => this.testSortingAlgorithms()}>Test Sort Algo</button>
                 </div>
                 <div className='bar-holder'>
                     {array.map((value, idx) => (
-                        <div 
-                         className='array-bar'
-                         key={idx} 
-                         style={{height: `${value}px`}}>
-                        </div>
+                          <div 
+                          className='array-bar'
+                          key={idx} 
+                          style={{height: `${value}px`,
+                          //! Highlights the bars that are being compared
+                          backgroundColor: this.state.sorted.includes(idx) ? 'green' : 
+                                 this.state.highlights.includes(idx) ? 'red' : '#2196F3'}}>
+                         </div>
                     ))}
                 </div>
             </div>
