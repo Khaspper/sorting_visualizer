@@ -142,6 +142,33 @@ export default class SortingVisualizer extends React.Component {
         return pivotIndex;
     }
 
+    async bubbleSort() {
+        const array = this.state.array.slice();  // Copy the current state
+        const n = array.length;
+    
+        for (let i = 0; i < n - 1; i++) {
+            for (let j = 0; j < n - i - 1; j++) {
+                if (array[j] > array[j + 1]) {
+                    // swap
+                    [array[j], array[j + 1]] = [array[j + 1], array[j]];
+    
+                    this.setState({ 
+                        array: array,
+                        highlights: [j, j+1]  // Highlight the swapped bars
+                    });
+                    
+                    this.setState({ array: array });
+                    //! Speed
+                    await new Promise(resolve => setTimeout(resolve, .01));  // Delay for visualization
+                }
+                else {
+                    this.setState({highlights: []}) // This clears the highlights
+                }
+            }
+        }
+        this.setState({ sorted: Array.from({ length: n }, (_, index) => index), highlights: [] });
+    }
+
     async insertionSort() {
         const array = this.state.array.slice();
         let n = array.length;
@@ -235,6 +262,7 @@ export default class SortingVisualizer extends React.Component {
                     <button onClick={() => this.resetArray()}>Generate New Array</button>
                     <button onClick={() => this.mergeSort()}>Merge Sort</button>
                     <button onClick={() => this.quickSort()}>Quick Sort</button>
+                    <button onClick={() => this.bubbleSort()}>Selection Sort</button>
                     <button onClick={() => this.insertionSort()}>Insertion Sort</button>
                     <button onClick={() => this.selectionSort()}>Selection Sort</button>
                     <button onClick={() => this.testSortingAlgorithms()}>Test Sort Algo</button>
