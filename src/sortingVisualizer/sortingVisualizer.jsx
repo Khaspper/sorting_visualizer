@@ -281,45 +281,40 @@ export default class SortingVisualizer extends React.Component {
         }
     }
 
-    async selectionSort() {
+    async handleSelectionSort() {
         if (this.isSorted(this.state.array)) {
-            this.resetArray();
+            await this.resetArray();
         }
-        
+    
         const array = this.state.array.slice();
-        let n = array.length;
-    
+        await this.selectionSort(array);
+        this.setState({ sorted: Array.from({ length: array.length }, (_, index) => index), highlights: [] });
+    }
+
+    async selectionSort(arr) {
+        const n = arr.length;
         for (let i = 0; i < n - 1; i++) {
-            let minIndex = i;
-    
-            // Highlight the current minIndex
-            this.setState({ highlights: [minIndex] });
-            await new Promise(resolve => setTimeout(resolve, 50));
+            let minIdx = i;
     
             for (let j = i + 1; j < n; j++) {
-                // Highlight the bars that are being compared
-                this.setState({ highlights: [minIndex, j] });
-                await new Promise(resolve => setTimeout(resolve, 50));
+                // Highlight the elements being compared
+                this.setState({ highlights: [minIdx, j] });
+                await new Promise(resolve => setTimeout(resolve, .01));  // Delay for visualization
     
-                if (array[j] < array[minIndex]) {
-                    minIndex = j;
-                    // Update the highlighted bar if a new minIndex is found
-                    this.setState({ highlights: [minIndex] });
-                    await new Promise(resolve => setTimeout(resolve, 50));
+                if (arr[j] < arr[minIdx]) {
+                    minIdx = j;
                 }
             }
     
-            if (minIndex !== i) {
-                // Swap the found minimum element with the first element
-                [array[i], array[minIndex]] = [array[minIndex], array[i]];
-                // Update the state after the swap
-                this.setState({ array });
-                await new Promise(resolve => setTimeout(resolve, 50));
+            // Swap the found minimum element with the first element
+            if (minIdx !== i) {
+                [arr[i], arr[minIdx]] = [arr[minIdx], arr[i]];
+    
+                // Highlight swapped elements
+                this.setState({ array: arr, highlights: [i, minIdx] });
+                await new Promise(resolve => setTimeout(resolve, .01));  // Delay for visualization
             }
         }
-    
-        // Once the sorting is done, update the `sorted` state to turn all bars green
-        this.setState({ sorted: Array.from({ length: n }, (_, index) => index), highlights: [] });
     }
 
     //! This is to test my algorithms
@@ -357,7 +352,7 @@ export default class SortingVisualizer extends React.Component {
                     <button onClick={() => this.handleHeapSort()}>Heap Sort</button>
                     <button onClick={() => this.bubbleSort()}>Bubble Sort</button>
                     <button onClick={() => this.handleInsertionSort()}>Insertion Sort</button>
-                    <button onClick={() => this.selectionSort()}>Selection Sort</button>
+                    <button onClick={() => this.handleSelectionSort()}>Selection Sort</button>
                 </div>
                 <div className='bar-holder'>
                     {array.map((value, idx) => (
