@@ -44,6 +44,4 @@
 
 //! Speed
 
-//! Speed change this later
-
 //! size
