@@ -44,4 +44,6 @@
 
 //! Size of the array
 
+//! Speed
+
 //! Speed change this later
