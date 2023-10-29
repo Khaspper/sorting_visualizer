@@ -142,6 +142,43 @@ export default class SortingVisualizer extends React.Component {
         return pivotIndex;
     }
 
+    async selectionSort() {
+        const array = this.state.array.slice();
+        let n = array.length;
+    
+        for (let i = 0; i < n - 1; i++) {
+            let minIndex = i;
+    
+            // Highlight the current minIndex
+            this.setState({ highlights: [minIndex] });
+            await new Promise(resolve => setTimeout(resolve, 50));
+    
+            for (let j = i + 1; j < n; j++) {
+                // Highlight the bars that are being compared
+                this.setState({ highlights: [minIndex, j] });
+                await new Promise(resolve => setTimeout(resolve, 50));
+    
+                if (array[j] < array[minIndex]) {
+                    minIndex = j;
+                    // Update the highlighted bar if a new minIndex is found
+                    this.setState({ highlights: [minIndex] });
+                    await new Promise(resolve => setTimeout(resolve, 50));
+                }
+            }
+    
+            if (minIndex !== i) {
+                // Swap the found minimum element with the first element
+                [array[i], array[minIndex]] = [array[minIndex], array[i]];
+                // Update the state after the swap
+                this.setState({ array });
+                await new Promise(resolve => setTimeout(resolve, 50));
+            }
+        }
+    
+        // Once the sorting is done, update the `sorted` state to turn all bars green
+        this.setState({ sorted: Array.from({ length: n }, (_, index) => index), highlights: [] });
+    }
+
     testSortingAlgorithms() {
         for (let i = 0; i < 1; i++) {
             const array = [];
@@ -163,6 +200,7 @@ export default class SortingVisualizer extends React.Component {
                     <button onClick={() => this.resetArray()}>Generate New Array</button>
                     <button onClick={() => this.mergeSort()}>Merge Sort</button>
                     <button onClick={() => this.quickSort()}>Quick Sort</button>
+                    <button onClick={() => this.selectionSort()}>Selection Sort</button>
                     <button onClick={() => this.testSortingAlgorithms()}>Test Sort Algo</button>
                 </div>
                 <div className='bar-holder'>
