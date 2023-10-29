@@ -17,18 +17,34 @@ export default class SortingVisualizer extends React.Component {
     }
 
     resetArray() {
-        const array = [];
-        //Change the 100 to the scroll
-        //! Size of the array
-        for (let i = 0; i < 100; i++) {
-            array.push(randomIntFromInterval(5, 730));
-        }
-        this.setState({
-            array, highlights: [], sorted: []
+        return new Promise(resolve => {
+            const array = [];
+            //! size
+            for (let i = 0; i < 50; i++) {
+                array.push(randomIntFromInterval(5, 730));
+            }
+            this.setState({
+                array,
+                highlights: [],
+                sorted: []
+            }, resolve);  // Callback after state is set
         });
     }
 
+    isSorted(arr) {
+        for (let i = 1; i < arr.length; i++) {
+            if (arr[i] < arr[i - 1]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     async mergeSort(startIndex = 0, endIndex = this.state.array.length - 1) {
+
+        if (this.isSorted(this.state.array)) {
+            this.resetArray();
+        }
         // Retrieve the total length of the array from the component's state.
         const length = this.state.array.length;
     
@@ -106,6 +122,10 @@ export default class SortingVisualizer extends React.Component {
     }
 
     async quickSort(startIndex = 0, endIndex = this.state.array.length - 1) {
+        if (this.isSorted(this.state.array)) {
+            await this.resetArray();
+        }
+
         let length = this.state.array.length;
         if (startIndex < endIndex) {
             const pivotIndex = await this.partition(startIndex, endIndex);
@@ -143,6 +163,10 @@ export default class SortingVisualizer extends React.Component {
     }
 
     async heapSort() {
+        if (this.isSorted(this.state.array)) {
+            this.resetArray();
+        }
+
         let array = this.state.array.slice();
         let n = array.length;
     
@@ -195,6 +219,10 @@ export default class SortingVisualizer extends React.Component {
     }
 
     async bubbleSort() {
+        if (this.isSorted(this.state.array)) {
+            await this.resetArray();
+        }
+        
         const array = this.state.array.slice();  // Copy the current state
         const n = array.length;
     
@@ -209,12 +237,10 @@ export default class SortingVisualizer extends React.Component {
                         highlights: [j, j+1]  // Highlight the swapped bars
                     });
                     
-                    this.setState({ array: array });
                     //! Speed
                     await new Promise(resolve => setTimeout(resolve, .01));  // Delay for visualization
-                }
-                else {
-                    this.setState({highlights: []}) // This clears the highlights
+                } else {
+                    this.setState({highlights: []}); // This clears the highlights
                 }
             }
         }
@@ -222,6 +248,10 @@ export default class SortingVisualizer extends React.Component {
     }
 
     async insertionSort() {
+        if (this.isSorted(this.state.array)) {
+            this.resetArray();
+        }
+
         const array = this.state.array.slice();
         let n = array.length;
     
@@ -257,6 +287,10 @@ export default class SortingVisualizer extends React.Component {
     }
 
     async selectionSort() {
+        if (this.isSorted(this.state.array)) {
+            this.resetArray();
+        }
+        
         const array = this.state.array.slice();
         let n = array.length;
     
