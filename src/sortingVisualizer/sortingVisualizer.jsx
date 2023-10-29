@@ -40,85 +40,69 @@ export default class SortingVisualizer extends React.Component {
         return true;
     }
 
-    async mergeSort(startIndex = 0, endIndex = this.state.array.length - 1) {
-
+    async handleMergeSort() {
         if (this.isSorted(this.state.array)) {
-            this.resetArray();
+            await this.resetArray();
         }
-        // Retrieve the total length of the array from the component's state.
-        const length = this.state.array.length;
     
-        // Base case: if the portion to be sorted has a size of 1 or 0, return immediately.
-        if (startIndex >= endIndex) {
+        const array = this.state.array.slice();
+        await this.mergeSort(array, 0, array.length - 1);
+        this.setState({ sorted: Array.from({ length: array.length }, (_, index) => index), highlights: [] });
+    }
+
+    async mergeSort(arr, left, right) {
+        if (left >= right) {
             return;
         }
-    
-        // Calculate the middle index of the current portion.
-        const middleIndex = Math.floor((startIndex + endIndex) / 2);
-    
-        // Recursively sort the left half of the current portion.
-        await this.mergeSort(startIndex, middleIndex);
-        // Recursively sort the right half of the current portion.
-        await this.mergeSort(middleIndex + 1, endIndex);
-    
-        // Merge the two sorted halves.
-        await this.merge(startIndex, middleIndex, endIndex);
-    
-        // If we're sorting the entire array (not just a sub-portion),
-        // mark the whole array as sorted and remove any highlights.
-        if (startIndex === 0 && endIndex === this.state.array.length - 1) {
-            this.setState({ 
-                // Create an array of indices representing the sorted state.
-                sorted: Array.from({ length: length }, (_, index) => index),
-                // Reset the highlights.
-                highlights: [] 
-            });
-        }
+        let middle = Math.floor((left + right) / 2);
+        await this.mergeSort(arr, left, middle);
+        await this.mergeSort(arr, middle + 1, right);
+        await this.merge(arr, left, middle, right);
     }
     
-    async merge(startIndex, middleIndex, endIndex) {
-        let left = startIndex;
-        let right = middleIndex + 1;
-        let temp = [];
+    async merge(arr, left, middle, right) {
+        let n1 = middle - left + 1;
+        let n2 = right - middle;
     
-        // Start a loop where we iterate as long as both 'left' and 'right' pointers are within their respective bounds.
-        while (left <= middleIndex && right <= endIndex) {
-            
-            // Set the current elements at 'left' and 'right' positions to be highlighted.
-            this.setState({ highlights: [left, right] });
-
-            // Introduce a short pause (0.01 milliseconds) for visualization purposes.
-            // This can be useful in animations to show comparisons between the two elements.
-            await new Promise(resolve => setTimeout(resolve, .01));
-
-            // Compare the elements at 'left' and 'right' positions in the array.
-
-            // If the element at 'left' is smaller, add it to the 'temp' array and move the 'left' pointer forward.
-            if (this.state.array[left] < this.state.array[right]) temp.push(this.state.array[left++]);
-            // Otherwise, add the element at 'right' to the 'temp' array and move the 'right' pointer forward.
-            else temp.push(this.state.array[right++]);
+        // Temporary arrays
+        let L = new Array(n1);
+        let R = new Array(n2);
+    
+        for (let i = 0; i < n1; i++)
+            L[i] = arr[left + i];
+        for (let j = 0; j < n2; j++)
+            R[j] = arr[middle + 1 + j];
+    
+        // Merge the temp arrays back into arr[left..right]
+        let i = 0;
+        let j = 0;
+        let k = left;
+        while (i < n1 && j < n2) {
+            if (L[i] <= R[j]) {
+                arr[k] = L[i];
+                i++;
+            } else {
+                arr[k] = R[j];
+                j++;
+            }
+            this.setState({ array: arr, highlights: [k] });
+            await new Promise(resolve => setTimeout(resolve, .01));  // Delay for visualization
+            k++;
         }
     
-        while (left <= middleIndex) {
-            temp.push(this.state.array[left++]);
-        }
-        while (right <= endIndex) {
-            temp.push(this.state.array[right++]);
-        }
-    
-        for (let i = 0; i < temp.length; i++) {
-            // Kept saying Line 94:13:  Do not mutate state directly. Use setState()
-            // But can't figure out how to make merge sort work without this code
-            this.state.array[startIndex + i] = temp[i];
-            this.setState({ array: this.state.array });
-    
-            // Highlight the current position being filled
-            this.setState({ highlights: [startIndex + i] });
-            //! Speed change this later
-            await new Promise(resolve => setTimeout(resolve, .01));
+        // Copy remaining elements of L[], if any
+        while (i < n1) {
+            arr[k] = L[i];
+            i++;
+            k++;
         }
     
-        this.setState({ highlights: [] }); // Clear highlights
+        // Copy remaining elements of R[], if any
+        while (j < n2) {
+            arr[k] = R[j];
+            j++;
+            k++;
+        }
     }
 
     async handleQuickSort() {
@@ -347,7 +331,7 @@ export default class SortingVisualizer extends React.Component {
             <div className='parent'>
                 <div className='nav-bar'>
                     <button onClick={() => this.resetArray()}>Generate New Array</button>
-                    <button onClick={() => this.mergeSort()}>Merge Sort</button>
+                    <button onClick={() => this.handleMergeSort()}>Merge Sort</button>
                     <button onClick={() => this.handleQuickSort()}>Quick Sort</button>
                     <button onClick={() => this.handleHeapSort()}>Heap Sort</button>
                     <button onClick={() => this.bubbleSort()}>Bubble Sort</button>

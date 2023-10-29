@@ -42,8 +42,8 @@
 
 //! Highlights the bars that are being compared
 
-//! Size of the array
-
 //! Speed
 
 //! Speed change this later
+
+//! size
