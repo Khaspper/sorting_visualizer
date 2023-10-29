@@ -161,59 +161,59 @@ export default class SortingVisualizer extends React.Component {
         return i + 1;
     }
 
-    async heapSort() {
+    async handleHeapSort() {
         if (this.isSorted(this.state.array)) {
-            this.resetArray();
+            await this.resetArray();
         }
+    
+        const array = this.state.array.slice();
+        await this.heapSort(array);
+        this.setState({ sorted: Array.from({ length: array.length }, (_, index) => index), highlights: [] });
+    }
 
-        let array = this.state.array.slice();
-        let n = array.length;
+    async heapSort(arr) {
+        const n = arr.length;
     
-        // Build a max heap
         for (let i = Math.floor(n / 2) - 1; i >= 0; i--) {
-            await this.heapify(array, n, i);
+            await this.heapify(arr, n, i);
         }
     
-        // One by one extract elements from heap
         for (let i = n - 1; i > 0; i--) {
-            // Move current root to end
-            [array[0], array[i]] = [array[i], array[0]];
-            this.setState({ array: array, highlights: [0, i] });
-            await new Promise(resolve => setTimeout(resolve, .01));
+            [arr[0], arr[i]] = [arr[i], arr[0]];  // Move largest element to end
     
-            // Call max heapify on the reduced heap
-            await this.heapify(array, i, 0);
+            // Highlight swapped elements
+            this.setState({ array: arr, highlights: [0, i] });
+            await new Promise(resolve => setTimeout(resolve, .01));  // Delay for visualization
+    
+            await this.heapify(arr, i, 0);
         }
-            this.setState({ sorted: Array.from({ length: n }, (_, index) => index), highlights: [] });
     }
     
-    async heapify(array, n, i) {
+    async heapify(arr, n, i) {
         let largest = i;
         let left = 2 * i + 1;
         let right = 2 * i + 2;
     
-        // If left child is larger than root
-        if (left < n && array[left] > array[largest]) {
+        // Highlight nodes being compared
+        this.setState({ highlights: [i, left, right] });
+        await new Promise(resolve => setTimeout(resolve, .01));  // Delay for visualization
+    
+        if (left < n && arr[left] > arr[largest]) {
             largest = left;
         }
     
-        // If right child is larger than largest so far
-        if (right < n && array[right] > array[largest]) {
+        if (right < n && arr[right] > arr[largest]) {
             largest = right;
         }
     
-        // If largest is not root
         if (largest !== i) {
-            this.setState({ highlights: [i, largest] });
-            await new Promise(resolve => setTimeout(resolve, 50));
+            [arr[i], arr[largest]] = [arr[largest], arr[i]];
     
-            [array[i], array[largest]] = [array[largest], array[i]];
+            // Highlight swapped elements
+            this.setState({ array: arr, highlights: [i, largest] });
+            await new Promise(resolve => setTimeout(resolve, .01));  // Delay for visualization
     
-            this.setState({ array: array });
-            await new Promise(resolve => setTimeout(resolve, 50));
-    
-            // Recursively heapify the affected sub-tree
-            await this.heapify(array, n, largest);
+            await this.heapify(arr, n, largest);
         }
     }
 
@@ -246,43 +246,39 @@ export default class SortingVisualizer extends React.Component {
         this.setState({ sorted: Array.from({ length: n }, (_, index) => index), highlights: [] });
     }
 
-    async insertionSort() {
+    async handleInsertionSort() {
         if (this.isSorted(this.state.array)) {
-            this.resetArray();
+            await this.resetArray();
         }
-
+    
         const array = this.state.array.slice();
-        let n = array.length;
-    
+        await this.insertionSort(array);
+        this.setState({ sorted: Array.from({ length: array.length }, (_, index) => index), highlights: [] });
+    }
+
+    async insertionSort(arr) {
+        const n = arr.length;
         for (let i = 1; i < n; i++) {
-            let key = array[i];
+            let key = arr[i];
             let j = i - 1;
-    
-            // Highlight the current bar being inserted
+
+            // Highlight the current element
             this.setState({ highlights: [i] });
-            await new Promise(resolve => setTimeout(resolve, 50));
-    
-            while (j >= 0 && array[j] > key) {
-                // Highlight the bars that are being compared
-                this.setState({ highlights: [j, i] });
-                await new Promise(resolve => setTimeout(resolve, 50));
-    
-                array[j + 1] = array[j];
-                j = j - 1;
+            await new Promise(resolve => setTimeout(resolve, .01));  // Delay for visualization
+
+            while (j >= 0 && arr[j] > key) {
+                arr[j + 1] = arr[j];
                 
-                // Update the state after shifting the bar
-                this.setState({ array });
-                await new Promise(resolve => setTimeout(resolve, .01));
+                // Highlight the compared elements
+                this.setState({ array: arr, highlights: [j, j+1] });
+                await new Promise(resolve => setTimeout(resolve, .01));  // Delay for visualization
+                
+                j = j - 1;
             }
-    
-            array[j + 1] = key;
-            // Update the state after inserting the bar to its correct position
-            this.setState({ array });
-            await new Promise(resolve => setTimeout(resolve, 50));
+            arr[j + 1] = key;
+
+            this.setState({ array: arr });
         }
-    
-        // Once the sorting is done, update the `sorted` state to turn all bars green
-        this.setState({ sorted: Array.from({ length: n }, (_, index) => index), highlights: [] });
     }
 
     async selectionSort() {
@@ -358,9 +354,9 @@ export default class SortingVisualizer extends React.Component {
                     <button onClick={() => this.resetArray()}>Generate New Array</button>
                     <button onClick={() => this.mergeSort()}>Merge Sort</button>
                     <button onClick={() => this.handleQuickSort()}>Quick Sort</button>
-                    <button onClick={() => this.heapSort()}>Heap Sort</button>
+                    <button onClick={() => this.handleHeapSort()}>Heap Sort</button>
                     <button onClick={() => this.bubbleSort()}>Bubble Sort</button>
-                    <button onClick={() => this.insertionSort()}>Insertion Sort</button>
+                    <button onClick={() => this.handleInsertionSort()}>Insertion Sort</button>
                     <button onClick={() => this.selectionSort()}>Selection Sort</button>
                 </div>
                 <div className='bar-holder'>
