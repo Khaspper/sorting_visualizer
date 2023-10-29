@@ -121,45 +121,44 @@ export default class SortingVisualizer extends React.Component {
         this.setState({ highlights: [] }); // Clear highlights
     }
 
-    async quickSort(startIndex = 0, endIndex = this.state.array.length - 1) {
+    async handleQuickSort() {
         if (this.isSorted(this.state.array)) {
             await this.resetArray();
         }
+    
+        const array = this.state.array.slice();
+        await this.quickSort(array);
+        this.setState({ sorted: Array.from({ length: array.length }, (_, index) => index), highlights: [] });
+    }
 
-        let length = this.state.array.length;
-        if (startIndex < endIndex) {
-            const pivotIndex = await this.partition(startIndex, endIndex);
-            await this.quickSort(startIndex, pivotIndex - 1);
-            await this.quickSort(pivotIndex + 1, endIndex);
-        }
-        if (startIndex === 0 && endIndex === this.state.array.length - 1) {
-            this.setState({ sorted: Array.from({ length: length }, (_, index) => index), highlights: [] });
+    async quickSort(arr, low = 0, high = arr.length - 1) {
+        if (low < high) {
+            let pi = await this.partition(arr, low, high);
+    
+            await this.quickSort(arr, low, pi - 1);
+            await this.quickSort(arr, pi + 1, high);
         }
     }
     
-    async partition(startIndex, endIndex) {
-        const array = this.state.array.slice();
-        const pivot = array[endIndex];
-        let pivotIndex = startIndex;
+    async partition(arr, low, high) {
+        let pivot = arr[high];
+        let i = (low - 1);
     
-        for (let i = startIndex; i < endIndex; i++) {
-            this.setState({ highlights: [i, endIndex] }); // Highlighting current index and pivot
-            await new Promise(resolve => setTimeout(resolve, .01));
-    
-            if (array[i] < pivot) {
-                // swap elements array[i] and array[pivotIndex]
-                [array[i], array[pivotIndex]] = [array[pivotIndex], array[i]];
-                this.setState({ array: array, highlights: [i, pivotIndex] });
-                await new Promise(resolve => setTimeout(resolve, 50));
-                pivotIndex++;
+        for (let j = low; j < high; j++) {
+            this.setState({ highlights: [i, j] });  // Highlight the elements being compared
+            await new Promise(resolve => setTimeout(resolve, .01));  // Delay for visualization
+            
+            if (arr[j] < pivot) {
+                i++;
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+                this.setState({ array: arr, highlights: [i, j] }); // Highlight swapped elements
             }
         }
-        // swap elements array[pivotIndex] and array[endIndex]
-        [array[pivotIndex], array[endIndex]] = [array[endIndex], array[pivotIndex]];
-        this.setState({ array: array, highlights: [pivotIndex] });
-        await new Promise(resolve => setTimeout(resolve, .01));
+        
+        [arr[i + 1], arr[high]] = [arr[high], arr[i + 1]];
+        this.setState({ array: arr, highlights: [i+1, high] });
     
-        return pivotIndex;
+        return i + 1;
     }
 
     async heapSort() {
@@ -358,7 +357,7 @@ export default class SortingVisualizer extends React.Component {
                 <div className='nav-bar'>
                     <button onClick={() => this.resetArray()}>Generate New Array</button>
                     <button onClick={() => this.mergeSort()}>Merge Sort</button>
-                    <button onClick={() => this.quickSort()}>Quick Sort</button>
+                    <button onClick={() => this.handleQuickSort()}>Quick Sort</button>
                     <button onClick={() => this.heapSort()}>Heap Sort</button>
                     <button onClick={() => this.bubbleSort()}>Bubble Sort</button>
                     <button onClick={() => this.insertionSort()}>Insertion Sort</button>
