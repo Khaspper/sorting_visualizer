@@ -142,6 +142,58 @@ export default class SortingVisualizer extends React.Component {
         return pivotIndex;
     }
 
+    async heapSort() {
+        let array = this.state.array.slice();
+        let n = array.length;
+    
+        // Build a max heap
+        for (let i = Math.floor(n / 2) - 1; i >= 0; i--) {
+            await this.heapify(array, n, i);
+        }
+    
+        // One by one extract elements from heap
+        for (let i = n - 1; i > 0; i--) {
+            // Move current root to end
+            [array[0], array[i]] = [array[i], array[0]];
+            this.setState({ array: array, highlights: [0, i] });
+            await new Promise(resolve => setTimeout(resolve, .01));
+    
+            // Call max heapify on the reduced heap
+            await this.heapify(array, i, 0);
+        }
+            this.setState({ sorted: Array.from({ length: n }, (_, index) => index), highlights: [] });
+    }
+    
+    async heapify(array, n, i) {
+        let largest = i;
+        let left = 2 * i + 1;
+        let right = 2 * i + 2;
+    
+        // If left child is larger than root
+        if (left < n && array[left] > array[largest]) {
+            largest = left;
+        }
+    
+        // If right child is larger than largest so far
+        if (right < n && array[right] > array[largest]) {
+            largest = right;
+        }
+    
+        // If largest is not root
+        if (largest !== i) {
+            this.setState({ highlights: [i, largest] });
+            await new Promise(resolve => setTimeout(resolve, 50));
+    
+            [array[i], array[largest]] = [array[largest], array[i]];
+    
+            this.setState({ array: array });
+            await new Promise(resolve => setTimeout(resolve, 50));
+    
+            // Recursively heapify the affected sub-tree
+            await this.heapify(array, n, largest);
+        }
+    }
+
     async bubbleSort() {
         const array = this.state.array.slice();  // Copy the current state
         const n = array.length;
@@ -241,17 +293,28 @@ export default class SortingVisualizer extends React.Component {
         this.setState({ sorted: Array.from({ length: n }, (_, index) => index), highlights: [] });
     }
 
-    testSortingAlgorithms() {
-        for (let i = 0; i < 1; i++) {
-            const array = [];
-            for (let j = 0; j < randomIntFromInterval(1, 1000); j++) {
-                array.push(randomIntFromInterval(-1000, 1000));
-            }
-            const javaScriptedArray = array.slice().sort((a, b) => a - b);
-            const mergeSortedArray = this.mergeSort(array.slice());
-            console.log(arraysAreEqual(javaScriptedArray, mergeSortedArray));
-        }
-    }
+    //! This is to test my algorithms
+    // testSortingAlgorithms() {
+    //     for (var i = 0; i < 100; i++) {
+    //         var randomArray = [];
+    //         for (var k = 0; k < 100; k++) {
+    //             randomArray.push(Math.floor(Math.random() * 1000));
+    //         }
+    
+    //         var sortedWithBuiltIn = randomArray.slice().sort(function(a, b) {
+    //             return a - b;
+    //         });
+    //         var sortedWithMergeSort = mergeSort(randomArray.slice());
+    
+    //         for (var j = 0; j < sortedWithBuiltIn.length; j++) {
+    //             if (sortedWithBuiltIn[j] !== sortedWithMergeSort[j]) {
+    //                 return false;
+    //             }
+    //         }
+    //     }
+    
+    //     return true;
+    // }
 
     render() {
         const {array} = this.state;
@@ -262,10 +325,10 @@ export default class SortingVisualizer extends React.Component {
                     <button onClick={() => this.resetArray()}>Generate New Array</button>
                     <button onClick={() => this.mergeSort()}>Merge Sort</button>
                     <button onClick={() => this.quickSort()}>Quick Sort</button>
+                    <button onClick={() => this.heapSort()}>Heap Sort</button>
                     <button onClick={() => this.bubbleSort()}>Bubble Sort</button>
                     <button onClick={() => this.insertionSort()}>Insertion Sort</button>
                     <button onClick={() => this.selectionSort()}>Selection Sort</button>
-                    <button onClick={() => this.testSortingAlgorithms()}>Test Sort Algo</button>
                 </div>
                 <div className='bar-holder'>
                     {array.map((value, idx) => (
@@ -288,15 +351,15 @@ function randomIntFromInterval(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min)
 }
 
-function arraysAreEqual(arr1, arr2) {
-    // Check if lengths are different
-    if (arr1.length !== arr2.length) return false;
+// function arraysAreEqual(arr1, arr2) {
+//     // Check if lengths are different
+//     if (arr1.length !== arr2.length) return false;
 
-    console.log(arr1, arr2)
-    // Check content equality
-    for (let i = 0; i < arr1.length; i++) {
-        if (arr1[i] !== arr2[i]) return false;
-    }
+//     console.log(arr1, arr2)
+//     // Check content equality
+//     for (let i = 0; i < arr1.length; i++) {
+//         if (arr1[i] !== arr2[i]) return false;
+//     }
 
-    return true;
-}
+//     return true;
+// }
