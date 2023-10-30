@@ -1,10 +1,16 @@
 .bar-holder {
-    width: 1426px;
+    height: 40vw;
+    width: 80vw;
     display: flex;
+    margin-left: 40px;
+    gap: 2px;
     justify-content: center;
     align-items: flex-end;
-    /* border: solid; */
-    gap: 2px;
+    align-items: center;
+    /*
+    border: solid;
+    */
+
 }
 
 .array-bar {

@@ -424,7 +424,7 @@ export default class SortingVisualizer extends React.Component {
                             onChange={this.handleSortSpeedChange}
                         />
                     </div>
-                    <button onClick={this.toggleSortingOrder}>Sorting Order (Currently {this.state.ascendingOrder ? "Ascending" : "Descending"})</button>
+                    <button onClick={this.toggleSortingOrder}>Sorting Order ({this.state.ascendingOrder ? "Ascending" : "Descending"})</button>
                     <button onClick={() => this.resetArray()}>New Array</button>
                     <button onClick={() => this.handleMergeSort()}>Merge Sort</button>
                     <button onClick={() => this.handleQuickSort()}>Quick Sort</button>
