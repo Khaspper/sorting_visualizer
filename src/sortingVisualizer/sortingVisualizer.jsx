@@ -8,27 +8,33 @@ export default class SortingVisualizer extends React.Component {
         this.state = {
             array: [],
             highlights: [], // Array to store highlighted indices
-            sorted: [] // Checks to see if array is sorted and changes color to green
+            sorted: [], // Checks to see if array is sorted and changes color to green
+            arraySize: 50,     // Default size
+            sortSpeed: 10      // Default speed (e.g., 10ms)
         };
+        
     }
 
     componentDidMount() {
         this.resetArray();
     }
 
+    handleArraySizeChange = (e) => {
+        const newSize = e.target.value;
+        this.setState({ arraySize: newSize }, this.resetArray);
+    }
+    
+    handleSortSpeedChange = (e) => {
+        const newSpeed = e.target.value;
+        this.setState({ sortSpeed: newSpeed });
+    }
+
     resetArray() {
-        return new Promise(resolve => {
-            const array = [];
-            //! size
-            for (let i = 0; i < 200; i++) {
-                array.push(randomIntFromInterval(5, 730));
-            }
-            this.setState({
-                array,
-                highlights: [],
-                sorted: []
-            }, resolve);  // Callback after state is set
-        });
+        const array = [];
+        for (let i = 0; i < this.state.arraySize; i++) {
+            array.push(randomIntFromInterval(5, 730));
+        }
+        this.setState({ array, highlights: [], sorted: [] });
     }
 
     isSorted(arr) {
@@ -330,6 +336,29 @@ export default class SortingVisualizer extends React.Component {
         return (
             <div className='parent'>
                 <div className='nav-bar'>
+
+                    <div>
+                        <label>Array Size: {this.state.arraySize}</label>
+                        <input 
+                            type="range" 
+                            min="5" 
+                            max="500" 
+                            value={this.state.arraySize} 
+                            onChange={this.handleArraySizeChange}
+                        />
+                    </div>
+
+                    <div>
+                        <label>Sorting Speed (ms): {this.state.sortSpeed}</label>
+                        <input 
+                            type="range" 
+                            min="1" 
+                            max="100" 
+                            value={this.state.sortSpeed} 
+                            onChange={this.handleSortSpeedChange}
+                        />
+                    </div>
+
                     <button onClick={() => this.resetArray()}>Generate New Array</button>
                     <button onClick={() => this.handleMergeSort()}>Merge Sort</button>
                     <button onClick={() => this.handleQuickSort()}>Quick Sort</button>
