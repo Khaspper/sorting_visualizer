@@ -36,7 +36,7 @@ export default class SortingVisualizer extends React.Component {
     resetArray() {
         const array = [];
         for (let i = 0; i < this.state.arraySize; i++) {
-            array.push(randomIntFromInterval(5, 730));
+            array.push(randomIntFromInterval(5, 620));
         }
         this.setState({ array, highlights: [], sorted: [] });
     }
@@ -64,12 +64,14 @@ export default class SortingVisualizer extends React.Component {
     }  
 
     async handleMergeSort() {
-        const arrayOrder = this.checkArrayOrder(this.state.array);
-        if (arrayOrder === "ascending" && this.state.ascendingOrder ||
-            arrayOrder === "descending" && !this.state.ascendingOrder) {
+        const order = this.checkArrayOrder(this.state.array);
+        if (order === "ascending" && this.state.ascendingOrder) {
+            await this.resetArray();
+        } else if (order === "descending" && !this.state.ascendingOrder) {
             await this.resetArray();
         }
         this.setState({ sorted: [], highlights: [] });
+        
         const array = this.state.array.slice();
         await this.mergeSort(array, 0, array.length - 1);
         this.setState({ sorted: Array.from({ length: array.length }, (_, index) => index), highlights: [] });
@@ -130,19 +132,19 @@ export default class SortingVisualizer extends React.Component {
             j++;
             k++;
         }
-    }    
+    }
 
     async handleQuickSort() {
         const arrayOrder = this.checkArrayOrder(this.state.array);
-        if (arrayOrder === "ascending" && this.state.ascendingOrder ||
-            arrayOrder === "descending" && !this.state.ascendingOrder) {
+        if ((arrayOrder === "ascending" && this.state.ascendingOrder) ||
+            (arrayOrder === "descending" && !this.state.ascendingOrder)) {
             await this.resetArray();
         }
         this.setState({ sorted: [], highlights: [] });
         const array = this.state.array.slice();
-        await this.mergeSort(array, 0, array.length - 1);
+        await this.quickSort(array, 0, array.length - 1, this.state.ascendingOrder);
         this.setState({ sorted: Array.from({ length: array.length }, (_, index) => index), highlights: [] });
-    }    
+    }
 
     async quickSort(arr, low = 0, high = arr.length - 1, ascendingOrder = true) {
         if (low < high) {
@@ -177,16 +179,18 @@ export default class SortingVisualizer extends React.Component {
     }    
 
     async handleHeapSort() {
-        const arrayOrder = this.checkArrayOrder(this.state.array);
-        if (arrayOrder === "ascending" && this.state.ascendingOrder ||
-            arrayOrder === "descending" && !this.state.ascendingOrder) {
+        const currentOrder = this.checkArrayOrder(this.state.array);
+        const desiredOrder = this.state.ascendingOrder ? "ascending" : "descending";
+        this.setState({ sorted: [], highlights: [] });
+        // If array is already sorted in the desired order, reset it
+        if (currentOrder === desiredOrder) {
             await this.resetArray();
         }
-        this.setState({ sorted: [], highlights: [] });
+        
         const array = this.state.array.slice();
-        await this.mergeSort(array, 0, array.length - 1);
+        await this.heapSort(array, desiredOrder);
         this.setState({ sorted: Array.from({ length: array.length }, (_, index) => index), highlights: [] });
-    }    
+    }
 
     async heapify(arr, n, i, order) {
         let largestOrSmallest = i;
@@ -281,16 +285,16 @@ export default class SortingVisualizer extends React.Component {
     
 
     async handleInsertionSort() {
-        const arrayOrder = this.checkArrayOrder(this.state.array);
-        if (arrayOrder === "ascending" && this.state.ascendingOrder ||
-            arrayOrder === "descending" && !this.state.ascendingOrder) {
+        const currentOrder = this.checkArrayOrder(this.state.array);
+        this.setState({ sorted: [], highlights: [] });
+        if ((this.state.ascendingOrder && currentOrder === "ascending") || (!this.state.ascendingOrder && currentOrder === "descending")) {
             await this.resetArray();
         }
-        this.setState({ sorted: [], highlights: [] });
+    
         const array = this.state.array.slice();
-        await this.mergeSort(array, 0, array.length - 1);
+        await this.insertionSort(array);
         this.setState({ sorted: Array.from({ length: array.length }, (_, index) => index), highlights: [] });
-    }    
+    }
     
     async insertionSort(arr) {
         const n = arr.length;
@@ -326,16 +330,17 @@ export default class SortingVisualizer extends React.Component {
     }    
 
     async handleSelectionSort() {
-        const arrayOrder = this.checkArrayOrder(this.state.array);
-        if (arrayOrder === "ascending" && this.state.ascendingOrder ||
-            arrayOrder === "descending" && !this.state.ascendingOrder) {
+        const currentOrder = this.checkArrayOrder(this.state.array);
+        const desiredOrder = this.state.ascendingOrder ? "ascending" : "descending";
+        this.setState({ sorted: [], highlights: [] });
+        if (currentOrder === desiredOrder) {
             await this.resetArray();
         }
-        this.setState({ sorted: [], highlights: [] });
+    
         const array = this.state.array.slice();
-        await this.mergeSort(array, 0, array.length - 1);
+        await this.selectionSort(array, desiredOrder);
         this.setState({ sorted: Array.from({ length: array.length }, (_, index) => index), highlights: [] });
-    }    
+    }
     
     async selectionSort(arr, desiredOrder) {
         const n = arr.length;
@@ -396,10 +401,10 @@ export default class SortingVisualizer extends React.Component {
         return (
             <div className='parent'>
                 <div className='nav-bar'>
-
-                    <div>
+                    <div class="slider-container">
                         <label>Array Size: {this.state.arraySize}</label>
                         <input 
+                            class="custom-slider"
                             type="range" 
                             min="5" 
                             max="500" 
@@ -408,9 +413,10 @@ export default class SortingVisualizer extends React.Component {
                         />
                     </div>
 
-                    <div>
+                    <div class="slider-container">
                         <label>Sorting Speed (ms): {this.state.sortSpeed}</label>
                         <input 
+                            class="custom-slider"
                             type="range" 
                             min="1" 
                             max="100" 
@@ -418,8 +424,8 @@ export default class SortingVisualizer extends React.Component {
                             onChange={this.handleSortSpeedChange}
                         />
                     </div>
-                    <button onClick={this.toggleSortingOrder}>Toggle Sorting Order (Currently {this.state.ascendingOrder ? "Ascending" : "Descending"})</button>
-                    <button onClick={() => this.resetArray()}>Generate New Array</button>
+                    <button onClick={this.toggleSortingOrder}>Sorting Order (Currently {this.state.ascendingOrder ? "Ascending" : "Descending"})</button>
+                    <button onClick={() => this.resetArray()}>New Array</button>
                     <button onClick={() => this.handleMergeSort()}>Merge Sort</button>
                     <button onClick={() => this.handleQuickSort()}>Quick Sort</button>
                     <button onClick={() => this.handleHeapSort()}>Heap Sort</button>

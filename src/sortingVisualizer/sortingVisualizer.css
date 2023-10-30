@@ -1,8 +1,9 @@
 .bar-holder {
+    width: 1426px;
     display: flex;
     justify-content: center;
     align-items: flex-end;
-    border: solid;
+    /* border: solid; */
     gap: 2px;
 }
 
@@ -13,12 +14,96 @@
 
 .parent {
     width: 90%;
-    margin: 0 auto;
-    padding-top: 2em;
+    margin: 0px auto;
 }
 
 .nav-bar {
-    display: flex;
+    display: block;
     justify-content: space-between;
     padding-bottom: 2em;
+}
+
+/* copied and pasted from a website */
+button {
+    margin: 10px 15px;
+    display: inline-block;
+    outline: 0;
+    border: 0;
+    cursor: pointer;
+    font-weight: 600;
+    color: #fff;
+    font-size: 14px;
+    height: 38px;
+    padding: 8px 24px;
+    border-radius: 50px;
+    background-image: linear-gradient(180deg,#7c8aff,#3c4fe0);
+    box-shadow: 0 4px 11px 0 rgb(37 44 97 / 15%), 0 1px 3px 0 rgb(93 100 148 / 20%);
+    transition: all .2s ease-out;
+}
+
+button:hover{
+    box-shadow: 0 8px 22px 0 rgb(37 44 97 / 15%), 0 4px 6px 0 rgb(93 100 148 / 20%);
+}
+
+.slider-container {
+    width: 100%;
+    padding: 10px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.slider-container label {
+    font-size: 1rem;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.custom-slider {
+    width: 80%;
+    height: 5px;
+    border-radius: 5px;
+    appearance: none;
+    outline: none;
+    background: linear-gradient(to right, #2980b9, #6dd5fa); /* Sample gradient background */
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+
+.custom-slider::-webkit-slider-thumb {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background-color: #3498db; /* Thumb color */
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.custom-slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background-color: #3498db;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.custom-slider:hover {
+    transform: scale(1.05);
+}
+
+.custom-slider:hover::-webkit-slider-thumb {
+    background-color: #2980b9; /* Darken thumb on hover */
+}
+
+.custom-slider:hover::-moz-range-thumb {
+    background-color: #2980b9;
+}
+
+.slider-container label {
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+    color: #333;
+    font-weight: bold; /* This makes the text bold */
 }
