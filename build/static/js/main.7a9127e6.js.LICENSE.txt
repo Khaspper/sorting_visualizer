@@ -41,5 +41,3 @@
  */
 
 //! Highlights the bars that are being compared
-
-//! Speed
