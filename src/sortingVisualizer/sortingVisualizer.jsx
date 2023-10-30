@@ -10,9 +10,13 @@ export default class SortingVisualizer extends React.Component {
             highlights: [], // Array to store highlighted indices
             sorted: [], // Checks to see if array is sorted and changes color to green
             arraySize: 50,     // Default size
-            sortSpeed: 10      // Default speed (e.g., 10ms)
+            sortSpeed: 10,      // Default speed (e.g., 10ms)
+            ascendingOrder: true,
         };
-        
+    }
+
+    toggleSortingOrder = () => {
+        this.setState(prevState => ({ ascendingOrder: !prevState.ascendingOrder }));
     }
 
     componentDidMount() {
@@ -92,7 +96,7 @@ export default class SortingVisualizer extends React.Component {
                 j++;
             }
             this.setState({ array: arr, highlights: [k] });
-            await new Promise(resolve => setTimeout(resolve, .01));  // Delay for visualization
+            await new Promise(resolve => setTimeout(resolve, this.state.sortSpeed));  // Delay for visualization
             k++;
         }
     
@@ -136,7 +140,7 @@ export default class SortingVisualizer extends React.Component {
     
         for (let j = low; j < high; j++) {
             this.setState({ highlights: [i, j] });  // Highlight the elements being compared
-            await new Promise(resolve => setTimeout(resolve, .01));  // Delay for visualization
+            await new Promise(resolve => setTimeout(resolve, this.state.sortSpeed));  // Delay for visualization
             
             if (arr[j] < pivot) {
                 i++;
@@ -173,7 +177,7 @@ export default class SortingVisualizer extends React.Component {
     
             // Highlight swapped elements
             this.setState({ array: arr, highlights: [0, i] });
-            await new Promise(resolve => setTimeout(resolve, .01));  // Delay for visualization
+            await new Promise(resolve => setTimeout(resolve, this.state.sortSpeed));  // Delay for visualization
     
             await this.heapify(arr, i, 0);
         }
@@ -186,7 +190,7 @@ export default class SortingVisualizer extends React.Component {
     
         // Highlight nodes being compared
         this.setState({ highlights: [i, left, right] });
-        await new Promise(resolve => setTimeout(resolve, .01));  // Delay for visualization
+        await new Promise(resolve => setTimeout(resolve, this.state.sortSpeed));  // Delay for visualization
     
         if (left < n && arr[left] > arr[largest]) {
             largest = left;
@@ -201,7 +205,7 @@ export default class SortingVisualizer extends React.Component {
     
             // Highlight swapped elements
             this.setState({ array: arr, highlights: [i, largest] });
-            await new Promise(resolve => setTimeout(resolve, .01));  // Delay for visualization
+            await new Promise(resolve => setTimeout(resolve, this.state.sortSpeed));  // Delay for visualization
     
             await this.heapify(arr, n, largest);
         }
@@ -211,13 +215,16 @@ export default class SortingVisualizer extends React.Component {
         if (this.isSorted(this.state.array)) {
             await this.resetArray();
         }
-        
-        const array = this.state.array.slice();  // Copy the current state
+
+        const array = this.state.array.slice();  
         const n = array.length;
-    
+        
         for (let i = 0; i < n - 1; i++) {
             for (let j = 0; j < n - i - 1; j++) {
-                if (array[j] > array[j + 1]) {
+    
+                const shouldSwap = this.state.ascendingOrder ? array[j] > array[j + 1] : array[j] < array[j + 1];
+    
+                if (shouldSwap) {
                     // swap
                     [array[j], array[j + 1]] = [array[j + 1], array[j]];
     
@@ -226,15 +233,15 @@ export default class SortingVisualizer extends React.Component {
                         highlights: [j, j+1]  // Highlight the swapped bars
                     });
                     
-                    //! Speed
-                    await new Promise(resolve => setTimeout(resolve, .01));  // Delay for visualization
+                    await new Promise(resolve => setTimeout(resolve, this.state.sortSpeed));  // Delay for visualization
                 } else {
-                    this.setState({highlights: []}); // This clears the highlights
+                    this.setState({highlights: []}) // This clears the highlights
                 }
             }
         }
         this.setState({ sorted: Array.from({ length: n }, (_, index) => index), highlights: [] });
     }
+        
 
     async handleInsertionSort() {
         if (this.isSorted(this.state.array)) {
@@ -254,14 +261,14 @@ export default class SortingVisualizer extends React.Component {
 
             // Highlight the current element
             this.setState({ highlights: [i] });
-            await new Promise(resolve => setTimeout(resolve, .01));  // Delay for visualization
+            await new Promise(resolve => setTimeout(resolve, this.state.sortSpeed));  // Delay for visualization
 
             while (j >= 0 && arr[j] > key) {
                 arr[j + 1] = arr[j];
                 
                 // Highlight the compared elements
                 this.setState({ array: arr, highlights: [j, j+1] });
-                await new Promise(resolve => setTimeout(resolve, .01));  // Delay for visualization
+                await new Promise(resolve => setTimeout(resolve, this.state.sortSpeed));  // Delay for visualization
                 
                 j = j - 1;
             }
@@ -284,28 +291,32 @@ export default class SortingVisualizer extends React.Component {
     async selectionSort(arr) {
         const n = arr.length;
         for (let i = 0; i < n - 1; i++) {
-            let minIdx = i;
-    
+            let optimalIdx = i; // Renaming this to 'optimal' since it can be either 'min' or 'max' based on the sort order
+        
             for (let j = i + 1; j < n; j++) {
                 // Highlight the elements being compared
-                this.setState({ highlights: [minIdx, j] });
-                await new Promise(resolve => setTimeout(resolve, .01));  // Delay for visualization
+                this.setState({ highlights: [optimalIdx, j] });
+                await new Promise(resolve => setTimeout(resolve, this.state.sortSpeed));  // Delay for visualization
+                
+                // Based on the sort order, decide which element is considered 'optimal' (either min or max)
+                const shouldSwap = this.state.ascendingOrder ? arr[j] < arr[optimalIdx] : arr[j] > arr[optimalIdx];
     
-                if (arr[j] < arr[minIdx]) {
-                    minIdx = j;
+                if (shouldSwap) {
+                    optimalIdx = j;
                 }
             }
-    
-            // Swap the found minimum element with the first element
-            if (minIdx !== i) {
-                [arr[i], arr[minIdx]] = [arr[minIdx], arr[i]];
-    
+        
+            // Swap the found optimal element with the first element
+            if (optimalIdx !== i) {
+                [arr[i], arr[optimalIdx]] = [arr[optimalIdx], arr[i]];
+        
                 // Highlight swapped elements
-                this.setState({ array: arr, highlights: [i, minIdx] });
-                await new Promise(resolve => setTimeout(resolve, .01));  // Delay for visualization
+                this.setState({ array: arr, highlights: [i, optimalIdx] });
+                await new Promise(resolve => setTimeout(resolve, this.state.sortSpeed));  // Delay for visualization
             }
         }
     }
+    
 
     //! This is to test my algorithms
     // testSortingAlgorithms() {
@@ -358,7 +369,7 @@ export default class SortingVisualizer extends React.Component {
                             onChange={this.handleSortSpeedChange}
                         />
                     </div>
-
+                    <button onClick={this.toggleSortingOrder}>Toggle Sorting Order (Currently {this.state.ascendingOrder ? "Ascending" : "Descending"})</button>
                     <button onClick={() => this.resetArray()}>Generate New Array</button>
                     <button onClick={() => this.handleMergeSort()}>Merge Sort</button>
                     <button onClick={() => this.handleQuickSort()}>Quick Sort</button>
