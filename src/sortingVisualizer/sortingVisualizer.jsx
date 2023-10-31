@@ -19,6 +19,10 @@ export default class SortingVisualizer extends React.Component {
         this.setState(prevState => ({ ascendingOrder: !prevState.ascendingOrder }));
     }
 
+    componentDidMount() {
+        this.resetArray();
+    }
+
     handleArraySizeChange = (e) => {
         const newSize = e.target.value;
         this.setState({ arraySize: newSize }, this.resetArray);
